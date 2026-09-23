@@ -222,11 +222,21 @@
     .lawn-rack .cell.big{min-height:124px;font-size:1.18rem}
   }
 
-  @media (max-width:720px) and (orientation:portrait){
-    .floor-wrap{
-      overflow:hidden;
-      touch-action:auto;
-    }
+  @media (max-width:720px) and (orientation:portrait) {
+  .floor-wrap {
+    overflow-x: auto;
+    overflow-y: hidden;
+    touch-action: pan-x pan-y pinch-zoom;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .sales-floor {
+    transform: scale(.59);
+    transform-origin: top left;
+    will-change: transform;
+  }
+}
+
     .sales-floor{
       transform:scale(.59);
       transform-origin:top left;
