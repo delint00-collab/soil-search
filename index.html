@@ -222,7 +222,10 @@
     .lawn-rack .cell.big{min-height:124px;font-size:1.18rem}
   }
 
-  @media (max-width:720px) and (orientation:portrait) {
+
+  
+
+@media (max-width:720px) and (orientation:portrait) {
   .floor-wrap {
     overflow-x: auto;
     overflow-y: hidden;
@@ -237,17 +240,25 @@
   }
 }
 
+
+
+
+
+
+
+
+  
     .sales-floor{
       transform:scale(.59);
       transform-origin:top left;
       will-change:transform;
     }
   }
-  @media (max-width:600px) and (orientation:portrait){.sales-floor{transform:scale(.49)}}
-  @media (max-width:480px) and (orientation:portrait){.sales-floor{transform:scale(.39)}}
-  @media (max-width:430px) and (orientation:portrait){.sales-floor{transform:scale(.35)}}
-  @media (max-width:390px) and (orientation:portrait){.sales-floor{transform:scale(.32)}}
-  @media (max-width:360px) and (orientation:portrait){.sales-floor{transform:scale(.29)}}
+  @media (max-width:600px) and (orientation:portrait){.sales-floor{ zoom.49 }}
+  @media (max-width:480px) and (orientation:portrait){.sales-floor{ zoom.39 }}
+  @media (max-width:430px) and (orientation:portrait){.sales-floor{ zoom.35 }}
+  @media (max-width:390px) and (orientation:portrait){.sales-floor{ zoom.32 }}
+  @media (max-width:360px) and (orientation:portrait){.sales-floor{ zoom.29 }}
 </style>
 </head>
 <body>
@@ -437,22 +448,38 @@
   const circledNumbers = ['', '①', '②', '③', '④', '⑤', '⑥', '⑦', '⑧', '⑨', '⑩', '⑪', '⑫', '⑬', '⑭'];
 
   let fitFrame;
-  function fitFloorOverview() {
-    cancelAnimationFrame(fitFrame);
-    fitFrame = requestAnimationFrame(() => {
-      const shouldFit = window.matchMedia('(max-width:720px) and (orientation:portrait)').matches;
-      if (!shouldFit) {
-        salesFloor.style.transform = '';
-        floorWrap.style.height = '';
-        return;
-      }
 
-      const scale = Math.min(1, floorWrap.clientWidth / salesFloor.offsetWidth);
-      salesFloor.style.transform = `scale(${scale})`;
-      floorWrap.style.height = `${Math.ceil(salesFloor.offsetHeight * scale)}px`;
-    });
-  }
+function fitFloorOverview() {
+  cancelAnimationFrame(fitFrame);
 
+  fitFrame = requestAnimationFrame(() => {
+    const shouldFit = window.matchMedia(
+      '(max-width:720px) and (orientation:portrait)'
+    ).matches;
+
+    if (!shouldFit) {
+      salesFloor.style.zoom = '';
+      salesFloor.style.transform = '';
+      floorWrap.style.height = '';
+      return;
+    }
+
+    const mobileFloorWidth = 1168;
+    const scale = Math.min(
+      1,
+      floorWrap.clientWidth / mobileFloorWidth
+    );
+
+    salesFloor.style.transform = 'none';
+    salesFloor.style.zoom = String(scale);
+    floorWrap.style.height = '';
+  });
+}
+
+
+
+
+  
   const norm = s => s
     .normalize('NFKC')
     .toLowerCase()
