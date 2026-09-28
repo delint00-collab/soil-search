@@ -1,594 +1,194 @@
-<!doctype html>
+<!DOCTYPE html>
+
 <html lang="ja">
 <head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=5,user-scalable=yes">
-<title>園芸用土・肥料 売場検索</title>
+<meta charset="utf-8"/>
+<meta content="width=device-width,initial-scale=1,maximum-scale=5,user-scalable=yes" name="viewport"/>
+<title>土売場検索</title>
 <style>
-  :root{
-    --bg:#f2f6f1;
-    --card:#fff;
-    --text:#1d2a22;
-    --muted:#647168;
-    --line:#34453a;
-    --accent:#1d6b45;
-    --accent-dark:#124a2f;
-    --accent-soft:#e2f3e9;
-    --gold:#d5a72f;
-    --shadow:0 8px 24px rgba(35,62,45,.10);
-  }
-  *{box-sizing:border-box}
-  html{scroll-behavior:smooth}
-  body{
-    margin:0;
-    font-family:system-ui,-apple-system,"Segoe UI","Noto Sans JP","Hiragino Kaku Gothic ProN",Meiryo,sans-serif;
-    color:var(--text);
-    background:
-      radial-gradient(circle at 100% 0,rgba(177,211,187,.32),transparent 34rem),
-      var(--bg);
-  }
-  header{
-    position:sticky;top:0;z-index:30;
-    color:#fff;
-    background:linear-gradient(135deg,var(--accent-dark),var(--accent));
-    box-shadow:0 4px 18px rgba(18,74,47,.22);
-  }
-  .head{max-width:1340px;margin:auto;padding:14px 16px}
-  h1{font-size:1.28rem;margin:0 0 10px;letter-spacing:.02em}
-  h1::before{content:"🌿";margin-right:.45rem}
-  .search-row{
-    display:flex;gap:8px;align-items:center;padding:7px;
-    background:rgba(255,255,255,.13);border:1px solid rgba(255,255,255,.18);border-radius:15px
-  }
-  input[type=search]{
-    flex:1;min-width:0;padding:12px 14px;font-size:16px;
-    color:var(--text);border:0;border-radius:10px;background:white;outline:0;
-  }
-  input[type=search]:focus{box-shadow:0 0 0 3px rgba(255,225,133,.88)}
-  button{
-    border:0;border-radius:10px;padding:12px 18px;font-size:15px;font-weight:700;
-    background:#fff;color:var(--accent-dark);cursor:pointer;transition:transform .15s ease,box-shadow .15s ease;
-  }
-  button:hover{transform:translateY(-1px);box-shadow:0 4px 12px rgba(0,0,0,.16)}
-  button:active{transform:translateY(0)}
-  button.secondary{background:rgba(255,255,255,.16);color:#fff;border:1px solid rgba(255,255,255,.36)}
-  .status{font-size:.88rem;color:rgba(255,255,255,.82);margin-top:7px;min-height:1.3em}
-  main{max-width:1340px;margin:auto;padding:20px 14px 48px}
-  section{
-    margin:0 0 16px;padding:8px;background:rgba(255,255,255,.82);
-    border:1px solid #d9e4dc;border-radius:14px;box-shadow:var(--shadow)
-  }
-  .rack-wrap{overflow-x:auto;padding-bottom:4px}
-  .rack{
-    display:grid;background:var(--line);gap:2px;border:2px solid var(--line);
-    min-width:840px;border-radius:9px;overflow:hidden
-  }
-  .fert{grid-template-columns:repeat(6,1fr)}
-  .fert-stack{display:grid;gap:18px;min-width:840px}
-  .fert-stack .rack{min-width:0}
-  .planter-grid{grid-template-columns:1fr 1fr 2.1fr 1fr 1fr}
-  .veg-grid{grid-template-columns:1fr 1fr 1fr 1fr 1fr 2fr}
-  .soil-b{grid-template-columns:1fr 1fr 1fr 1fr 1fr 1fr 1.2fr}
-  .soil-c{grid-template-columns:1fr 1fr 1fr 1fr 1fr 1fr}
-  .floor-wrap{overflow-x:auto;padding-bottom:6px}
-  .sales-floor{
-    display:grid;
-    grid-template-columns:minmax(858px,1fr) 438px;
-    gap:16px;
-    align-items:start;
-    min-width:1312px;
-  }
-  .main-racks{display:contents}
-  .main-racks section{grid-column:1;align-self:start}
-  .number-result{
-    grid-column:2;
-    grid-row:1 / span 3;
-    align-self:start;
-    background:#fff;
-    border:2px solid var(--accent);
-    border-radius:14px;
-    padding:14px;
-    box-shadow:0 6px 20px rgba(31,35,40,.12);
-    max-height:620px;
-    overflow:auto;
-  }
-  .number-result[hidden]{display:none}
-  .number-result h3{margin:0 0 10px;font-size:1rem;color:var(--accent)}
-  .number-result-entry{padding:10px 0;border-top:1px solid #d7dbe0}
-  .number-result-entry:first-of-type{border-top:0;padding-top:0}
-  .number-result-entry h4{margin:0 0 6px;font-size:1.25rem}
-  .number-result-entry ul{margin:0;padding-left:1.25rem;font-size:.9rem;line-height:1.55}
-  .lawn-area{
-    grid-column:2;
-    grid-row:4 / span 2;
-    min-width:0;
-    align-self:start;
-  }
-  .lawn-area section{margin:0}
-  .lawn-rack{
-    grid-template-columns:repeat(2,1fr);
-    min-width:420px;
-    width:420px;
-  }
-  .lawn-rack .cell{min-height:160px}
-  .lawn-rack .cell.big{min-height:180px}
-  .lawn-rack .span2{grid-column:span 2}
-  .cell{
-    background:#fff;padding:9px;min-height:78px;
-    display:flex;align-items:center;justify-content:center;text-align:center;
-    line-height:1.45;position:relative;overflow-wrap:anywhere;
-    transition:background .16s ease;
-  }
-  .cell:hover{background:#f1f8f3}
-  .cell strong{font-size:1.02rem}
-  .cell.big{font-size:1.55rem;font-weight:700;min-height:108px}
-  .cell.tall{min-height:110px}
-  .cell.left{text-align:left;justify-content:flex-start}
-  .num{
-    display:inline-grid;place-items:center;
-    width:36px;height:36px;border:2px solid var(--accent-dark);border-radius:50%;
-    color:var(--accent-dark);background:#eef7f1;font-weight:800;font-size:1.08rem;flex:none;
-  }
-  mark{background:#ffe981;padding:0 .12em;border-radius:.15em}
-  .match{
-    z-index:2;
-    outline:5px solid #f0b928;
-    outline-offset:-5px;
-    background:#fff6cf!important;
-    animation:blink 0.7s ease-in-out 5;
-  }
-  @keyframes blink{
-    0%,100%{box-shadow:inset 0 0 0 0 rgba(11,102,195,0)}
-    50%{box-shadow:inset 0 0 0 999px rgba(255,238,90,.48)}
-  }
-  @media (prefers-reduced-motion:reduce){
-    .match{animation:none}
-  }
-  .legend{
-    background:#fff;border:1px solid #d7e2da;border-left:5px solid var(--gold);
-    border-radius:12px;padding:12px 14px;margin-bottom:16px;font-size:.9rem;box-shadow:var(--shadow)
-  }
-  .legend::before{content:"💡";margin-right:.35rem}
-  .mobile-hint{display:none}
-  .span2{grid-column:span 2}
-  .span3{grid-column:span 3}
-  .row2{grid-row:span 2}
-
-  @media (max-width:720px){
-    
-    .head{padding:10px}
-    h1{font-size:1.05rem;margin-bottom:8px}
-    .search-row{
-      display:grid;
-      grid-template-columns:1fr 1fr;
-      gap:7px;
-    }
-    input[type=search]{
-      grid-column:1 / -1;
-      width:100%;
-      padding:11px 12px;
-    }
-    button{min-height:44px;padding:10px 12px}
-    .status{font-size:.8rem;margin-top:6px}
-    main{width:100%;padding:12px 8px 36px}
-    .legend{padding:10px;margin-bottom:10px;font-size:.82rem;line-height:1.5}
-    .mobile-hint{display:block;margin-top:4px;color:var(--accent);font-weight:700}
-    .floor-wrap{
-      overflow-x:auto;
-      padding:0 0 6px;
-      overscroll-behavior-inline:contain;
-      -webkit-overflow-scrolling:touch;
-      scrollbar-width:thin;
-    }
-    .sales-floor{
-      display:grid;
-      grid-template-columns:778px 378px;
-      min-width:1168px;
-      gap:12px;
-    }
-    .main-racks{display:contents}
-    .main-racks section{margin-bottom:12px}
-    .number-result{
-      grid-column:2;
-      grid-row:1 / span 3;
-      width:378px;
-      max-height:620px;
-      margin-bottom:0;
-      padding:12px;
-    }
-    .lawn-area{
-      grid-column:2;
-      grid-row:4 / span 2;
-      width:378px;
-      margin-top:0;
-    }
-    .rack-wrap{
-      width:100%;
-      overflow:visible;
-    }
-    .rack{min-width:760px}
-    .fert-stack{min-width:760px}
-    .fert-stack .rack{min-width:0}
-    .cell{min-height:72px;padding:7px;font-size:.8rem}
-    .cell strong{font-size:.88rem}
-    .cell.big{font-size:1.12rem;min-height:94px}
-    .num{width:32px;height:32px;font-size:1rem}
-    .lawn-rack{
-      grid-template-columns:repeat(2,minmax(0,1fr));
-      width:360px;
-      min-width:360px;
-    }
-    .lawn-rack .cell{min-height:108px;font-size:.88rem}
-    .lawn-rack .cell.big{min-height:124px;font-size:1.18rem}
-  }
-
-
-
-  @media (max-width:720px) and (orientation:portrait) {
-  .floor-wrap {
-    overflow: visible;
-    touch-action: auto;
-  }
-
-  .sales-floor {
-    transform: none;
-    zoom: .59;
-  }
+:root{
+  --bg:#f2f6f1;--card:#fff;--text:#1d2a22;--muted:#647168;--line:#34453a;
+  --accent:#1d6b45;--accent-dark:#124a2f;--accent-soft:#e2f3e9;--gold:#d5a72f;
+  --shadow:0 8px 24px rgba(35,62,45,.10);
+}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{
+  margin:0;font-family:system-ui,-apple-system,"Segoe UI","Noto Sans JP","Hiragino Kaku Gothic ProN",Meiryo,sans-serif;
+  color:var(--text);background:radial-gradient(circle at 100% 0,rgba(177,211,187,.32),transparent 34rem),var(--bg)
+}
+header{position:sticky;top:0;z-index:50;color:#fff;background:linear-gradient(135deg,var(--accent-dark),var(--accent));box-shadow:0 4px 18px rgba(18,74,47,.22)}
+.head{max-width:1380px;margin:auto;padding:14px 16px}
+h1{font-size:1.28rem;margin:0 0 10px;letter-spacing:.02em} h1::before{content:"🌿";margin-right:.45rem}
+.search-row{display:flex;gap:8px;align-items:center;padding:7px;background:rgba(255,255,255,.13);border:1px solid rgba(255,255,255,.18);border-radius:15px}
+input[type=search]{flex:1;min-width:0;padding:12px 14px;font-size:16px;color:var(--text);border:0;border-radius:10px;background:#fff;outline:0}
+input[type=search]:focus{box-shadow:0 0 0 3px rgba(255,225,133,.88)}
+button{border:0;border-radius:10px;padding:12px 18px;font-size:15px;font-weight:700;background:#fff;color:var(--accent-dark);cursor:pointer;transition:transform .15s ease,box-shadow .15s ease}
+button:hover{transform:translateY(-1px);box-shadow:0 4px 12px rgba(0,0,0,.16)} button:active{transform:translateY(0)}
+button.secondary{background:rgba(255,255,255,.16);color:#fff;border:1px solid rgba(255,255,255,.36)}
+.status{font-size:.88rem;color:rgba(255,255,255,.84);margin-top:7px;min-height:1.3em}
+main{max-width:1380px;margin:auto;padding:20px 14px 48px}
+.legend{background:#fff;border:1px solid #d7e2da;border-left:5px solid var(--gold);border-radius:12px;padding:12px 14px;margin-bottom:16px;font-size:.9rem;box-shadow:var(--shadow)}
+ .mobile-hint{display:none}
+.results{display:none;background:#fff;border:2px solid var(--accent);border-radius:14px;padding:12px 14px;margin:0 0 16px;box-shadow:var(--shadow)}
+.results.show{display:block} .results h2{font-size:1rem;color:var(--accent);margin:0 0 8px}
+.result-list{display:flex;flex-wrap:wrap;gap:7px}
+.result-chip{border:1px solid #c9d8ce;background:#f8fbf9;border-radius:999px;padding:7px 10px;font-size:.82rem;color:var(--text);cursor:pointer;max-width:100%;white-space:normal;text-align:left}
+.result-chip:hover{background:var(--accent-soft)}
+.floor-card{background:rgba(255,255,255,.82);border:1px solid #d9e4dc;border-radius:14px;box-shadow:var(--shadow);padding:10px;overflow:hidden}
+.floor-scroll{overflow:auto;-webkit-overflow-scrolling:touch;overscroll-behavior:contain;border-radius:10px;background:#edf3ef;padding:10px}
+.map-sizer{position:relative;margin:0 auto}
+.layout{position:absolute;left:0;top:0;width:2120.00px;height:1890.00px;background:#fff;transform-origin:top left;border:2px solid var(--line);border-radius:9px;overflow:hidden;box-shadow:0 3px 10px rgba(31,35,40,.08)}
+.item{position:absolute;box-sizing:border-box;border:1px solid var(--line);display:flex;flex-direction:column;justify-content:center;align-items:center;text-align:center;line-height:1.18;padding:5px 7px;overflow:hidden;overflow-wrap:anywhere;word-break:normal;background:#fff;transition:background .16s ease,box-shadow .16s ease}
+.item:hover{background:#f1f8f3} .item.blank{background:#fbfcfb}
+.item div{max-width:100%;white-space:normal}
+.label{position:absolute;box-sizing:border-box;display:flex;align-items:center;justify-content:center;text-align:center;line-height:1;white-space:nowrap;font-weight:800;color:var(--accent-dark);writing-mode:vertical-rl;text-orientation:upright;letter-spacing:.08em}
+.match{z-index:3;outline:8px solid #f0b928;outline-offset:-8px;background:#fff6cf!important;animation:blink .7s ease-in-out 5}
+@keyframes blink{0%,100%{box-shadow:inset 0 0 0 0 rgba(255,238,90,0)}50%{box-shadow:inset 0 0 0 999px rgba(255,238,90,.48)}}
+@media (prefers-reduced-motion:reduce){.match{animation:none}}
+.no-result{color:#8b342a;font-weight:700}
+@media (max-width:720px){
+  .head{padding:10px} h1{font-size:1.05rem;margin-bottom:8px}
+  .search-row{display:grid;grid-template-columns:1fr 1fr;gap:7px}
+  input[type=search]{grid-column:1/-1;width:100%;padding:11px 12px} button{min-height:44px;padding:10px 12px}
+  .status{font-size:.8rem;margin-top:6px} main{padding:12px 8px 36px}
+  .legend{padding:10px;margin-bottom:10px;font-size:.82rem;line-height:1.5} .mobile-hint{display:block;margin-top:4px;color:var(--accent);font-weight:700}
+  .floor-card{padding:6px} .floor-scroll{padding:6px;overflow:visible}
+  .result-chip{font-size:.75rem}
 }
 
-@media (max-width:600px) and (orientation:portrait) {
-  .sales-floor { zoom: .49; }
+.item .multi-product{
+  width:100%;
+  box-sizing:border-box;
+  text-align:center;
+  line-height:1.12;
 }
-
-@media (max-width:480px) and (orientation:portrait) {
-  .sales-floor { zoom: .39; }
+.item .multi-product + .multi-product{
+  margin-top:3px;
+  padding-top:3px;
+  border-top:1px dashed #bbb;
 }
-
-@media (max-width:430px) and (orientation:portrait) {
-  .sales-floor { zoom: .35; }
-}
-
-@media (max-width:390px) and (orientation:portrait) {
-  .sales-floor { zoom: .32; }
-}
-
-@media (max-width:360px) and (orientation:portrait) {
-  .sales-floor { zoom: .29; }
-}
-
-
 </style>
 </head>
 <body>
 <header>
-  <div class="head">
-    <h1>園芸用土・肥料 売場検索</h1>
-    <div class="search-row">
-      <input id="q" type="search" placeholder="例：油粕、苦土石灰、赤玉土" autocomplete="off">
-      <button id="searchBtn" type="button">検索</button>
-      <button id="clearBtn" type="button" class="secondary">クリア</button>
-    </div>
-    <div id="status" class="status" aria-live="polite">商品名を入力すると該当場所が点滅します。</div>
-  </div>
+<div class="head">
+<h1>土売場検索</h1>
+<div class="search-row">
+<input autocomplete="off" id="q" placeholder="例：赤玉土、苦土石灰、培養土" type="search"/>
+<button id="searchBtn" type="button">検索</button>
+<button class="secondary" id="clearBtn" type="button">クリア</button>
+</div>
+<div aria-live="polite" class="status" id="status">商品名を入力すると該当する棚が点滅します。</div>
+</div>
 </header>
-
 <main>
-  <div class="legend">
-    検索は部分一致です。複数箇所にある商品は、該当する棚をすべて強調表示します。
-    <span class="mobile-hint">縦画面では全体表示されます。ピンチ操作で拡大できます。</span>
-  </div>
-
-  <div class="floor-wrap">
-  <div class="sales-floor">
-  <div class="main-racks">
-  <section>
-    <div class="rack-wrap">
-      <div class="fert-stack" id="fertRack">
-      <div class="rack fert">
-        <div class="cell" data-search="3 ③ 堆肥入り化成肥料10kg 野菜専用化成10kg"><span class="num">3</span></div>
-        <div class="cell" data-search="骨粉入り油粕 10kg"><strong>骨粉入り油粕<br>10kg</strong></div>
-        <div class="cell" data-search="油粕 10kg"><strong>油粕 10kg</strong></div>
-        <div class="cell" data-search="有機化成肥料 666 10kg"><strong>有機化成肥料<br>666　10kg</strong></div>
-        <div class="cell" data-search="有機化成肥料 666 10kg"><strong>有機化成肥料<br>666　10kg</strong></div>
-        <div class="cell" data-search="普通化成肥料 8-8-8 10kg"><strong>普通化成肥料<br>8-8-8　10kg</strong></div>
-
-        <div class="cell" data-search="4 ④ 野菜専用化成5kg 堆肥入り化成肥料8-10-8 5kg 堆肥入り化成肥料12-10-8 5kg 野菜づくり一粒入魂4-5-4 5kg"><span class="num">4</span></div>
-        <div class="cell" data-search="2 ② 骨粉入り油粕ペレット5kg 骨粉入り油粕5kg 有機リン酸バットグアノ"><span class="num">2</span></div>
-        <div class="cell" data-search="1 ① 配合肥料5kg 油粕5kg 配合肥料10kg"><span class="num">1</span></div>
-        <div class="cell" data-search="化成肥料 ようりん 5kg"><strong>化成肥料 ようりん＋<br>5kg</strong></div>
-        <div class="cell" data-search="有機化成肥料 666 5kg"><strong>有機化成肥料<br>666　5kg</strong></div>
-        <div class="cell" data-search="普通化成肥料 8-8-8 5kg"><strong>普通化成肥料<br>8-8-8　5kg</strong></div>
-      </div>
-
-      <div class="rack fert">
-        <div class="cell" data-search="5 ⑤ 粒状苦土石灰5kg 消石灰5kg 有機石灰5kg"><span class="num">5</span></div>
-        <div class="cell" data-search="6 ⑥ ハイパワー苦土石灰4kg 骨粉入り野菜の肥料5kg ペレット鶏糞5kg"><span class="num">6</span></div>
-        <div class="cell" data-search="8 ⑧ 発酵油粕 中粒 小粒 芝生の肥料666"><span class="num">8</span></div>
-        <div class="cell" data-search="10 ⑩ サッチを分解する芝生肥料5kg 野菜の肥料5kg"><span class="num">10</span></div>
-        <div class="cell" data-search="12 ⑫ ねぎ 玉ねぎの肥料5kg ジャガイモの肥料5kg 有機リン酸バットグアノ5kg"><span class="num">12</span></div>
-        <div class="cell" data-search="5 ⑤ 粒状苦土石灰5kg 消石灰5kg 有機石灰5kg"><span class="num">5</span></div>
-
-        <div class="cell" data-number="14" data-search="14 ⑭ 粒状苦土石灰 10kg 消石灰 10kg 有機石灰 10kg"><strong>粒状苦土石灰<br>10kg</strong></div>
-        <div class="cell" data-search="7 ⑦ 消石灰10kg 有機石灰10kg 庭木 果樹の肥料5kg"><span class="num">7</span></div>
-        <div class="cell" data-search="9 ⑨ 固形骨粉 緑化 薔薇の肥料5kg"><span class="num">9</span></div>
-        <div class="cell" data-search="11 ⑪ 有機100%芝生の肥料10kg 5kg 野菜の肥料10kg"><span class="num">11</span></div>
-        <div class="cell" data-search="13 ⑬ ねぎ 玉ねぎの肥料10kg ジャガイモの肥料10kg ブルーベリーの肥料5kg"><span class="num">13</span></div>
-        <div class="cell" data-search="15 ⑮"><span class="num">15</span></div>
-      </div>
-      </div>
-    </div>
-
-  </section>
-
-  <section>
-    <div class="rack-wrap">
-      <div class="rack planter-grid">
-        <div class="cell big span3" data-search="プランターの土 14L">プランターの土 14L</div>
-        <div class="cell big span2" data-search="プランターの土 14L">プランターの土<br>14L</div>
-
-        <div class="cell" data-search="マグァンプK入り お花を育てる培養土"><strong>マグァンプ<br>K入り<br>お花を育てる<br>培養土</strong></div>
-        <div class="cell" data-search="初めての花の培養土 14L"><strong>初めての花の<br>培養土　14L</strong></div>
-        <div class="cell" data-search="お花を育てる培養土 25L"><strong>お花を育てる培養土<br>25L</strong></div>
-        <div class="cell" data-search="お花を育てる培養土 14L"><strong>お花を育てる<br>培養土　14L</strong></div>
-        <div class="cell" data-search="プレミアムプランターの土"><strong>プレミアム<br>プランターの土</strong></div>
-      </div>
-    </div>
-  </section>
-
-  <section>
-    <div class="rack-wrap">
-      <div class="rack veg-grid">
-        <div class="cell" data-search="かるーい培養土 25L"><strong>かるーい<br>培養土<br>25L</strong></div>
-        <div class="cell" data-search="初めての野菜の培養土 40L"><strong>初めての<br>野菜の培養土<br>40L</strong></div>
-        <div class="cell" data-search="初めての野菜の培養土 25L"><strong>初めての<br>野菜の培養土<br>25L</strong></div>
-        <div class="cell" data-search="マグァンプK入り 野菜を育てる培養土"><strong>マグァンプK入<br>野菜を育てる<br>培養土</strong></div>
-        <div class="cell" data-search="美味しい野菜を育てる堆肥"><strong>美味しい野菜<br>を育てる堆肥</strong></div>
-        <div class="cell big row2" data-search="野菜を育てる培養土 25L">野菜を育てる<br>培養土　25L</div>
-
-        <div class="cell" data-search="かるい培養土 12L"><strong>かるい<br>培養土<br>12L</strong></div>
-        <div class="cell left" data-search="オーガニック培養土 オーガニックバーグ堆肥25L つやつやな観葉植物">
-          <strong><small>オーガニック培養土<br>オーガニックバーグ<br>堆肥25L<br>つやつやな<br>観葉植物</small></strong>
-        </div>
-        <div class="cell" data-search="オーガニック培養土 25L"><strong>オーガニック<br>培養土<br>25L</strong></div>
-        <div class="cell" data-search="花と野菜のかるーい培養土 25L"><strong>花と野菜の<br>かるーい培養土<br>25L</strong></div>
-        <div class="cell" data-search="野菜を育てる培養土 40L"><strong>野菜を育てる<br>培養土<br>40L</strong></div>
-      </div>
-    </div>
-  </section>
-
-  <section>
-    <div class="rack-wrap">
-      <div class="rack soil-b">
-        <div class="cell" data-search="種まきの匠 14L"><strong>種まきの匠<br>14L</strong></div>
-        <div class="cell" data-search="バーク堆肥入り腐葉土 14L"><strong>バーク堆肥入り腐葉土<br>14L</strong></div>
-        <div class="cell" data-search="木の葉100%腐葉土 25L"><strong>木の葉100%腐葉土<br>25L</strong></div>
-        <div class="cell big span2" data-search="黒土 25L">黒土<br>25L</div>
-        <div class="cell" data-search="赤玉土 中粒"><strong>赤玉土<br>（中粒）</strong></div>
-        <div class="cell big row2" data-search="赤玉土 小粒">赤玉土<br>（小粒）</div>
-
-        <div class="cell" data-search="花壇 庭作りの土 30L"><strong>花壇・庭作りの土<br>30L</strong></div>
-        <div class="cell left" data-search="捨てられる培養土 いちごの培養土 ブルーベリーの土 25L"><strong>捨てられる培養土<br>いちごの培養土<br>ブルーベリーの土 25L</strong></div>
-        <div class="cell" data-search="果樹 庭木の土 25L"><strong>果樹・庭木の土<br>25L</strong></div>
-        <div class="cell" data-search="鹿沼土細粒 14L"><strong>鹿沼土細粒<br>14L</strong></div>
-        <div class="cell" data-search="上質鹿沼土 14L"><strong>上質鹿沼土<br>14L</strong></div>
-        <div class="cell" data-search="赤玉土 大粒"><strong>赤玉土<br>（大粒）</strong></div>
-      </div>
-    </div>
-  </section>
-
-  <section>
-    <div class="rack-wrap">
-      <div class="rack soil-c">
-        <div class="cell" data-search="土のリサイクル材 25L"><strong>土のリサイクル材<br>25L</strong></div>
-        <div class="cell" data-search="土のリサイクル材 14L"><strong>土のリサイクル材<br>14L</strong></div>
-        <div class="cell" data-search="薔薇の土 25L"><strong>薔薇の土<br>25L</strong></div>
-        <div class="cell" data-search="ピートモス 18L"><strong>ピートモス 18L</strong></div>
-        <div class="cell" data-search="バーミキュライト 18L"><strong>バーミキュライト<br>18L</strong></div>
-        <div class="cell" data-search="那須高原黒毛和牛の堆肥 20L"><strong>那須高原黒毛和牛<br>の堆肥 20L</strong></div>
-
-        <div class="cell" data-search="鉢底石 10L"><strong>鉢底石<br>10L</strong></div>
-        <div class="cell" data-search="川砂 10L"><strong>川砂<br>10L</strong></div>
-        <div class="cell" data-search="軽石小粒 16L"><strong>軽石小粒<br>16L</strong></div>
-        <div class="cell left" data-search="デコレーションバークM 50L 桐生砂14L"><strong>デコレーションバークM 50L<br>桐生砂 14L</strong></div>
-        <div class="cell left" data-search="デコレーションバークS デコレーションバークM 25L"><strong>デコレーションバークS<br>デコレーションバークM 25L</strong></div>
-        <div class="cell big" data-search="発酵牛ふん 25L">発酵牛ふん<br>25L</div>
-      </div>
-    </div>
-  </section>
-
-  </div>
-  <aside id="numberResult" class="number-result" aria-live="polite" hidden></aside>
-  <aside class="lawn-area" aria-label="芝用売場">
-  <section>
-    <div class="rack-wrap">
-      <div class="rack lawn-rack">
-        <div class="cell big span2" data-search="芝の目砂 15kg">芝の目砂<br>15kg</div>
-        <div class="cell tall" data-search="芝の床土 16L"><strong>芝の床土<br>16L</strong></div>
-        <div class="cell tall" data-search="芝肥料の入った目土 16L"><strong>芝肥料の入った目土<br>16L</strong></div>
-        <div class="cell" data-search="芝の目土 14L"><strong>芝の目土<br>14L</strong></div>
-        <div class="cell" data-search="芝のお手入れ材 14L"><strong>芝のお手入れ材<br>14L</strong></div>
-      </div>
-    </div>
-  </section>
-  </aside>
-  </div>
-  </div>
-
+<div class="legend"><span class="mobile-hint">縦画面では売場全体を縮小表示します。必要に応じてピンチ操作で拡大できます。</span></div>
+<section aria-live="polite" class="results" id="results">
+<h2 id="resultTitle">検索結果</h2>
+<div class="result-list" id="resultList"></div>
+</section>
+<div class="floor-card">
+<div class="floor-scroll" id="floorScroll">
+<div class="map-sizer" id="mapSizer">
+<div aria-label="土売場レイアウト 左90度回転" class="layout" id="layout" style="">
+<div class="item" data-index="1" data-label="鉢底石 10L" data-search="鉢底石10l" style="left:70.00px;top:1745.00px;width:210.00px;height:125.00px;font-size:18px"><div>鉢底石 10L</div></div><div class="item" data-index="2" data-label="川砂 10L" data-search="川砂10l" style="left:280.00px;top:1745.00px;width:210.00px;height:125.00px;font-size:18px"><div>川砂 10L</div></div><div class="item" data-index="3" data-label="軽石 小粒 桐生砂 14L" data-search="軽石小粒桐生砂14l" style="left:490.00px;top:1745.00px;width:210.00px;height:125.00px;font-size:18px"><div>軽石 小粒</div><div>桐生砂 14L</div></div><div class="item" data-index="4" data-label="デコレーション バークM 50L" data-search="デコレーションバークm50l" style="left:700.00px;top:1745.00px;width:210.00px;height:125.00px;font-size:18px"><div>デコレーション</div><div>バークM 50L</div></div><div class="item" data-index="5" data-label="発酵牛糞 25L" data-search="発酵牛糞25l" style="left:1330.00px;top:1745.00px;width:210.00px;height:125.00px;font-size:18px"><div>発酵牛糞</div><div>25L</div></div><div class="item" data-index="6" data-label="デコレーション バークM 25L" data-search="デコレーションバークm25l" style="left:910.00px;top:1745.00px;width:210.00px;height:125.00px;font-size:18px"><div>デコレーション</div><div>バークM 25L</div></div><div class="item" data-index="7" data-label="発酵牛糞 25L" data-search="発酵牛糞25l" style="left:1120.00px;top:1745.00px;width:210.00px;height:125.00px;font-size:18px"><div>発酵牛糞</div><div>25L</div></div><div class="item" data-index="8" data-label="花壇・庭造りの土 30L" data-search="花壇庭造りの土30l" style="left:70.00px;top:1425.00px;width:210.00px;height:125.00px;font-size:18px"><div>花壇・庭造りの土</div><div>30L</div></div><div class="item" data-index="9" data-label="ブルーベリーの土 25L いちごの培養土 14L 捨てられる培養土 14L" data-search="ブルーベリーの土25lいちごの培養土14l捨てられる培養土14l" style="left:280.00px;top:1425.00px;width:210.00px;height:125.00px;font-size:18px"><div>ブルーベリーの土 25L</div><div>いちごの培養土 14L</div><div>捨てられる培養土 14L</div></div><div class="item" data-index="10" data-label="果樹・庭木の土 25L" data-search="果樹庭木の土25l" style="left:490.00px;top:1425.00px;width:210.00px;height:125.00px;font-size:18px"><div>果樹・庭木の土</div><div>25L</div></div><div class="item" data-index="11" data-label="鹿沼土 細粒 14L" data-search="鹿沼土細粒14l" style="left:700.00px;top:1425.00px;width:210.00px;height:125.00px;font-size:18px"><div>鹿沼土 細粒</div><div>14L</div></div><div class="item" data-index="12" data-label="赤玉土 小粒 14L" data-search="赤玉土小粒14l" style="left:1330.00px;top:1425.00px;width:210.00px;height:125.00px;font-size:18px"><div>赤玉土 小粒</div><div>14L</div></div><div class="item" data-index="13" data-label="上質鹿沼土 14L" data-search="上質鹿沼土14l" style="left:910.00px;top:1425.00px;width:210.00px;height:125.00px;font-size:18px"><div>上質鹿沼土</div><div>14L</div></div><div class="item" data-index="14" data-label="赤玉土 大粒 14L" data-search="赤玉土大粒14l" style="left:1120.00px;top:1425.00px;width:210.00px;height:125.00px;font-size:18px"><div>赤玉土 大粒</div><div>14L</div></div><div class="item" data-index="15" data-label="土のリサイクル材 25L" data-search="土のリサイクル材25l" style="left:70.00px;top:1620.00px;width:210.00px;height:125.00px;font-size:18px"><div>土のリサイクル材</div><div>25L</div></div><div class="item" data-index="16" data-label="土のリサイクル材 14L" data-search="土のリサイクル材14l" style="left:280.00px;top:1620.00px;width:210.00px;height:125.00px;font-size:18px"><div>土のリサイクル材</div><div>14L</div></div><div class="item" data-index="17" data-label="薔薇の匠 25L" data-search="薔薇の匠25l" style="left:490.00px;top:1620.00px;width:210.00px;height:125.00px;font-size:18px"><div>薔薇の匠</div><div>25L</div></div><div class="item" data-index="18" data-label="ピートモス 18L" data-search="ピートモス18l" style="left:700.00px;top:1620.00px;width:210.00px;height:125.00px;font-size:18px"><div>ピートモス</div><div>18L</div></div><div class="item" data-index="19" data-label="特別な堆肥 25L" data-search="特別な堆肥25l" style="left:1330.00px;top:1620.00px;width:210.00px;height:125.00px;font-size:18px"><div>特別な堆肥</div><div>25L</div></div><div class="item" data-index="20" data-label="バーミキュライト 18L" data-search="バーミキュライト18l" style="left:910.00px;top:1620.00px;width:210.00px;height:125.00px;font-size:18px"><div>バーミキュライト</div><div>18L</div></div><div class="item" data-index="21" data-label="那須高原黒毛和牛の堆肥 20L" data-search="那須高原黒毛和牛の堆肥20l" style="left:1120.00px;top:1620.00px;width:210.00px;height:125.00px;font-size:18px"><div>那須高原黒毛和牛の堆肥 20L</div></div><div class="item" data-index="22" data-label="種まきの匠 14L" data-search="種まきの匠14l" style="left:70.00px;top:1300.00px;width:210.00px;height:125.00px;font-size:18px"><div>種まきの匠</div><div>14L</div></div><div class="item" data-index="23" data-label="バーク堆肥入り 腐葉土 14L" data-search="バーク堆肥入り腐葉土14l" style="left:280.00px;top:1300.00px;width:210.00px;height:125.00px;font-size:18px"><div>バーク堆肥入り</div><div>腐葉土</div><div>14L</div></div><div class="item" data-index="24" data-label="木の葉100％腐葉土 25L" data-search="木の葉100腐葉土25l" style="left:490.00px;top:1300.00px;width:210.00px;height:125.00px;font-size:18px"><div>木の葉100％腐葉土</div><div>25L</div></div><div class="item" data-index="25" data-label="黒土 14L" data-search="黒土14l" style="left:700.00px;top:1300.00px;width:210.00px;height:125.00px;font-size:18px"><div>黒土 14L</div></div><div class="item" data-index="26" data-label="赤玉土 小粒 14L" data-search="赤玉土小粒14l" style="left:1330.00px;top:1300.00px;width:210.00px;height:125.00px;font-size:18px"><div>赤玉土 小粒</div><div>14L</div></div><div class="item" data-index="27" data-label="黒土 14L" data-search="黒土14l" style="left:910.00px;top:1300.00px;width:210.00px;height:125.00px;font-size:18px"><div>黒土 14L</div></div><div class="item" data-index="28" data-label="赤玉土 中粒 14L" data-search="赤玉土中粒14l" style="left:1120.00px;top:1300.00px;width:210.00px;height:125.00px;font-size:18px"><div>赤玉土 中粒</div><div>14L</div></div><div class="item" data-index="29" data-label="かるーい培養土 25L" data-search="かるーい培養土25l" style="left:70.00px;top:980.00px;width:210.00px;height:125.00px;font-size:18px"><div>かるーい培養土</div><div>25L</div></div><div class="item" data-index="30" data-label="初めての野菜の培養土 40L" data-search="初めての野菜の培養土40l" style="left:280.00px;top:980.00px;width:210.00px;height:125.00px;font-size:18px"><div>初めての野菜の培養土</div><div>40L</div></div><div class="item" data-index="31" data-label="初めての野菜の培養土 25L" data-search="初めての野菜の培養土25l" style="left:490.00px;top:980.00px;width:210.00px;height:125.00px;font-size:18px"><div>初めての野菜の培養土</div><div>25L</div></div><div class="item" data-index="32" data-label="マグァンプK入り野菜を育てる培養土 25L" data-search="マグァンプk入り野菜を育てる培養土25l" style="left:700.00px;top:980.00px;width:210.00px;height:125.00px;font-size:18px"><div>マグァンプK入り野菜を育てる培養土</div><div>25L</div></div><div class="item" data-index="33" data-label="野菜を育てる培養土 25L" data-search="野菜を育てる培養土25l" style="left:1330.00px;top:980.00px;width:210.00px;height:125.00px;font-size:18px"><div>野菜を育てる培養土</div><div>25L</div></div><div class="item" data-index="34" data-label="おいしい野菜を育てる堆肥 25L" data-search="おいしい野菜を育てる堆肥25l" style="left:910.00px;top:980.00px;width:210.00px;height:125.00px;font-size:18px"><div>おいしい野菜を育てる堆肥</div><div>25L</div></div><div class="item" data-index="35" data-label="野菜を育てる培養土 25L" data-search="野菜を育てる培養土25l" style="left:1120.00px;top:980.00px;width:210.00px;height:125.00px;font-size:18px"><div>野菜を育てる培養土</div><div>25L</div></div><div class="item" data-index="36" data-label="かるい培養土 12L" data-search="かるい培養土12l" style="left:70.00px;top:1105.00px;width:210.00px;height:125.00px;font-size:18px"><div>かるい培養土</div><div>12L</div></div><div class="item" data-index="37" data-label="つやつやな観葉植物を育てる培養土 14L" data-search="つやつやな観葉植物を育てる培養土14l" style="left:280.00px;top:1105.00px;width:210.00px;height:125.00px;font-size:18px"><div>つやつやな観葉植物を育てる培養土</div><div>14L</div></div><div class="item" data-index="38" data-label="オーガニック培養土 14L" data-search="オーガニック培養土14l" style="left:490.00px;top:1105.00px;width:210.00px;height:125.00px;font-size:18px"><div>オーガニック培養土</div><div>14L</div></div><div class="item" data-index="39" data-label="花と野菜のかる～い 培養土 25L" data-search="花と野菜のかる~い培養土25l" style="left:700.00px;top:1105.00px;width:210.00px;height:125.00px;font-size:18px"><div>花と野菜のかる～い</div><div>培養土</div><div>25L</div></div><div class="item" data-index="40" data-label="そのまま植えられる 野菜の培養土 15L" data-search="そのまま植えられる野菜の培養土15l" style="left:1330.00px;top:1105.00px;width:210.00px;height:125.00px;font-size:18px"><div>そのまま植えられる</div><div>野菜の培養土</div><div>15L</div></div><div class="item" data-index="41" data-label="野菜を育てる培養土 40L" data-search="野菜を育てる培養土40l" style="left:910.00px;top:1105.00px;width:210.00px;height:125.00px;font-size:18px"><div>野菜を育てる培養土</div><div>40L</div></div><div class="item" data-index="42" data-label="そのまま植えられる 野菜の培養土 15L" data-search="そのまま植えられる野菜の培養土15l" style="left:1120.00px;top:1105.00px;width:210.00px;height:125.00px;font-size:18px"><div>そのまま植えられる</div><div>野菜の培養土</div><div>15L</div></div><div class="item blank" data-index="43" data-label="" data-search="" style="left:70.00px;top:785.00px;width:210.00px;height:125.00px;font-size:18px"><div> </div></div><div class="item blank" data-index="44" data-label="" data-search="" style="left:280.00px;top:785.00px;width:210.00px;height:125.00px;font-size:18px"><div> </div></div><div class="item" data-index="45" data-label="マグァンプK入りお花を育てる培養土 25L" data-search="マグァンプk入りお花を育てる培養土25l" style="left:490.00px;top:785.00px;width:210.00px;height:125.00px;font-size:18px"><div>マグァンプK入りお花を育てる培養土</div><div>25L</div></div><div class="item" data-index="46" data-label="初めての花の培養土 14L" data-search="初めての花の培養土14l" style="left:700.00px;top:785.00px;width:210.00px;height:125.00px;font-size:18px"><div>初めての花の培養土</div><div>14L</div></div><div class="item" data-index="47" data-label="プレミアム プランターの土 14L" data-search="プレミアムプランターの土14l" style="left:1330.00px;top:785.00px;width:210.00px;height:125.00px;font-size:18px"><div>プレミアム プランターの土</div><div>14L</div></div><div class="item" data-index="48" data-label="お花を育てる培養土 25L" data-search="お花を育てる培養土25l" style="left:910.00px;top:785.00px;width:210.00px;height:125.00px;font-size:18px"><div>お花を育てる培養土</div><div>25L</div></div><div class="item" data-index="49" data-label="お花を育てる培養土 14L" data-search="お花を育てる培養土14l" style="left:1120.00px;top:785.00px;width:210.00px;height:125.00px;font-size:18px"><div>お花を育てる培養土</div><div>14L</div></div><div class="item blank" data-index="50" data-label="" data-search="" style="left:70.00px;top:660.00px;width:210.00px;height:125.00px;font-size:18px"><div> </div></div><div class="item blank" data-index="51" data-label="" data-search="" style="left:280.00px;top:660.00px;width:210.00px;height:125.00px;font-size:18px"><div> </div></div><div class="item" data-index="52" data-label="プランターの土 14L" data-search="プランターの土14l" style="left:490.00px;top:660.00px;width:210.00px;height:125.00px;font-size:18px"><div>プランターの土</div><div>14L</div></div><div class="item" data-index="53" data-label="プランターの土 14L" data-search="プランターの土14l" style="left:700.00px;top:660.00px;width:210.00px;height:125.00px;font-size:18px"><div>プランターの土</div><div>14L</div></div><div class="item" data-index="54" data-label="石原和幸氏監修 プレミアム培養土 25L" data-search="石原和幸氏監修プレミアム培養土25l" style="left:1330.00px;top:660.00px;width:210.00px;height:125.00px;font-size:18px"><div>石原和幸氏監修</div><div>プレミアム培養土</div><div>25L</div></div><div class="item" data-index="55" data-label="プランターの土 14L" data-search="プランターの土14l" style="left:910.00px;top:660.00px;width:210.00px;height:125.00px;font-size:18px"><div>プランターの土</div><div>14L</div></div><div class="item" data-index="56" data-label="プランターの土 14L" data-search="プランターの土14l" style="left:1120.00px;top:660.00px;width:210.00px;height:125.00px;font-size:18px"><div>プランターの土</div><div>14L</div></div><div class="item" data-index="57" data-label="粒状苦土石灰 10kg" data-search="粒状苦土石灰10kg" style="left:70.00px;top:465.00px;width:210.00px;height:125.00px;font-size:18px"><div>粒状苦土石灰 10kg</div></div><div class="item" data-index="58" data-label="消石灰 10kg 有機石灰 10kg 庭木・果樹の肥料 5kg" data-search="消石灰10kg有機石灰10kg庭木果樹の肥料5kg" style="left:280.00px;top:465.00px;width:210.00px;height:125.00px;font-size:18px"><div>消石灰 10kg</div><div>有機石灰 10kg</div><div>庭木・果樹の肥料 5kg</div></div><div class="item" data-index="59" data-label="固形骨粉 5kg 緑花 5kg バラの肥料 5kg" data-search="固形骨粉5kg緑花5kgバラの肥料5kg" style="left:490.00px;top:465.00px;width:210.00px;height:125.00px;font-size:18px"><div>固形骨粉 5kg</div><div>緑花 5kg</div><div>バラの肥料 5kg</div></div><div class="item" data-index="60" data-label="日清 芝生の肥料 10kg 日清 芝生の肥料 5kg 野菜の肥料 10kg" data-search="日清芝生の肥料10kg日清芝生の肥料5kg野菜の肥料10kg" style="left:700.00px;top:465.00px;width:210.00px;height:125.00px;font-size:18px"><div>日清 芝生の肥料 10kg</div><div>日清 芝生の肥料 5kg</div><div>野菜の肥料 10kg</div></div><div class="item" data-index="62" data-label="ねぎ・玉ねぎの肥料 10kg / おいしいじゃがいも・さといもの肥料 10kg / ブルーベリーの肥料 5kg" data-search="ねぎ玉ねぎの肥料10kgおいしいじゃがいもさといもの肥料10kgブルーベリーの肥料5kg" style="left:910.00px;top:465.00px;width:210.00px;height:125.00px;font-size:18px"><div class="multi-product">ねぎ・玉ねぎの肥料 10kg</div><div class="multi-product">おいしいじゃがいも・さといもの肥料 10kg</div><div class="multi-product">ブルーベリーの肥料 5kg</div></div><div class="item" data-index="63" data-label="粒状苦土石灰 10kg 消石灰 10kg 有機石灰 10kg" data-search="粒状苦土石灰10kg消石灰10kg有機石灰10kg" style="left:1120.00px;top:465.00px;width:210.00px;height:125.00px;font-size:18px"><div>粒状苦土石灰 10kg</div><div>消石灰 10kg</div><div>有機石灰 10kg</div></div><div class="item" data-index="64" data-label="粒状苦土石灰 5kg 消石灰 5kg 有機石灰 5kg" data-search="粒状苦土石灰5kg消石灰5kg有機石灰5kg" style="left:70.00px;top:340.00px;width:210.00px;height:125.00px;font-size:18px"><div>粒状苦土石灰 5kg</div><div>消石灰 5kg</div><div>有機石灰 5kg</div></div><div class="item" data-index="65" data-label="ハイパワー苦土石灰 4kg 木酢入りペレット 鶏ふん 5kg" data-search="ハイパワー苦土石灰4kg木酢入りペレット鶏ふん5kg" style="left:280.00px;top:340.00px;width:210.00px;height:125.00px;font-size:18px"><div>ハイパワー苦土石灰 4kg</div><div>木酢入りペレット</div><div>鶏ふん 5kg</div></div><div class="item" data-index="66" data-label="発酵油かす 中粒 5kg 発酵油かす 小粒 5kg" data-search="発酵油かす中粒5kg発酵油かす小粒5kg" style="left:490.00px;top:340.00px;width:210.00px;height:125.00px;font-size:18px"><div>発酵油かす 中粒 5kg</div><div>発酵油かす 小粒 5kg</div></div><div class="item" data-index="67" data-label="芝生の肥料 5kg サッチを分解する芝生肥料 5kg 野菜の肥料 5kg" data-search="芝生の肥料5kgサッチを分解する芝生肥料5kg野菜の肥料5kg" style="left:700.00px;top:340.00px;width:210.00px;height:125.00px;font-size:18px"><div>芝生の肥料 5kg</div><div>サッチを分解する芝生肥料 5kg</div><div>野菜の肥料 5kg</div></div><div class="item" data-index="68" data-label="循環型培養土 10L" data-search="循環型培養土10l" style="left:1330.00px;top:340.00px;width:210.00px;height:250.00px;font-size:18px"><div>循環型培養土</div><div>10L</div></div><div class="item" data-index="69" data-label="ねぎ・玉ねぎの肥料 5kg / おいしいじゃがいも・さといもの肥料 5kg / バットグアノ 5kg" data-search="ねぎ玉ねぎの肥料5kgおいしいじゃがいもさといもの肥料5kgバットグアノ5kg" style="left:910.00px;top:340.00px;width:210.00px;height:125.00px;font-size:18px"><div class="multi-product">ねぎ・玉ねぎの肥料 5kg</div><div class="multi-product">おいしいじゃがいも・さといもの肥料 5kg</div><div class="multi-product">バットグアノ 5kg</div></div><div class="item" data-index="70" data-label="粒状苦土石灰 5kg 消石灰 5kg 有機石灰 5kg" data-search="粒状苦土石灰5kg消石灰5kg有機石灰5kg" style="left:1120.00px;top:340.00px;width:210.00px;height:125.00px;font-size:18px"><div>粒状苦土石灰 5kg</div><div>消石灰 5kg</div><div>有機石灰 5kg</div></div><div class="item" data-index="71" data-label="土づくり堆肥入り化成肥料 10kg 国産野菜専用化成肥料14-10-13 5kg" data-search="土づくり堆肥入り化成肥料10kg国産野菜専用化成肥料1410135kg" style="left:70.00px;top:145.00px;width:210.00px;height:125.00px;font-size:18px"><div>土づくり堆肥入り化成肥料 10kg</div><div>国産野菜専用化成肥料14-10-13 5kg</div></div><div class="item" data-index="72" data-label="バットグアノ 5kg 骨粉入り油粕 5kg 骨粉入り油かすペレット 5kg" data-search="バットグアノ5kg骨粉入り油粕5kg骨粉入り油かすペレット5kg" style="left:280.00px;top:145.00px;width:210.00px;height:125.00px;font-size:18px"><div>バットグアノ 5kg</div><div>骨粉入り油粕 5kg</div><div>骨粉入り油かすペレット 5kg</div></div><div class="item" data-index="73" data-label="配合肥料 10kg 油かす 5kg 配合肥料 5kg" data-search="配合肥料10kg油かす5kg配合肥料5kg" style="left:490.00px;top:145.00px;width:210.00px;height:125.00px;font-size:18px"><div>配合肥料 10kg</div><div>油かす 5kg</div><div>配合肥料 5kg</div></div><div class="item" data-index="74" data-label="化成肥料ようりん+ 5kg 有機化成肥料666 5kg" data-search="化成肥料ようりん5kg有機化成肥料6665kg" style="left:700.00px;top:145.00px;width:210.00px;height:125.00px;font-size:18px"><div>化成肥料ようりん+</div><div>5kg</div><div>有機化成肥料666 5kg</div></div><div class="item" data-index="76" data-label="有機・天然原料100％ 野菜の肥料 4kg" data-search="有機天然原料100野菜の肥料4kg" style="left:910.00px;top:145.00px;width:210.00px;height:125.00px;font-size:18px"><div>有機・天然原料100％</div><div>野菜の肥料</div><div>4kg</div></div><div class="item" data-index="77" data-label="化成肥料 8-8-8 5kg" data-search="化成肥料8885kg" style="left:1120.00px;top:145.00px;width:210.00px;height:125.00px;font-size:18px"><div>化成肥料 8-8-8</div><div>5kg</div></div><div class="item" data-index="78" data-label="野菜づくり一粒入魂4-5-4 国産野菜専用化成肥料14-10-13 10kg" data-search="野菜づくり一粒入魂454国産野菜専用化成肥料14101310kg" style="left:70.00px;top:20.00px;width:210.00px;height:125.00px;font-size:18px"><div>野菜づくり一粒入魂4-5-4</div><div>国産野菜専用化成肥料14-10-13 10kg</div></div><div class="item" data-index="79" data-label="骨粉入り油粕 10kg" data-search="骨粉入り油粕10kg" style="left:280.00px;top:20.00px;width:210.00px;height:125.00px;font-size:18px"><div>骨粉入り油粕</div><div>10kg</div></div><div class="item" data-index="80" data-label="油かす 10kg" data-search="油かす10kg" style="left:490.00px;top:20.00px;width:210.00px;height:125.00px;font-size:18px"><div>油かす</div><div>10kg</div></div><div class="item" data-index="81" data-label="有機化成肥料 10kg" data-search="有機化成肥料10kg" style="left:700.00px;top:20.00px;width:210.00px;height:125.00px;font-size:18px"><div>有機化成肥料</div><div>10kg</div></div><div class="item" data-index="82" data-label="花と野菜の循環型培養土 25L" data-search="花と野菜の循環型培養土25l" style="left:1330.00px;top:20.00px;width:210.00px;height:250.00px;font-size:18px"><div>花と野菜の循環型培養土</div><div>25L</div></div><div class="item" data-index="83" data-label="有機・天然原料100％ 野菜の肥料 8kg" data-search="有機天然原料100野菜の肥料8kg" style="left:910.00px;top:20.00px;width:210.00px;height:125.00px;font-size:18px"><div>有機・天然原料100％</div><div>野菜の肥料</div><div>8kg</div></div><div class="item" data-index="84" data-label="化成肥料 10kg" data-search="化成肥料10kg" style="left:1120.00px;top:20.00px;width:210.00px;height:125.00px;font-size:18px"><div>化成肥料</div><div>10kg</div></div><div class="item" data-index="85" data-label="芝の床土 16L" data-search="芝の床土16l" style="left:1670.00px;top:1355.00px;width:210.00px;height:125.00px;font-size:18px"><div>芝の床土</div><div>16L</div></div><div class="item" data-index="86" data-label="肥料の入った 芝の目土 16L" data-search="肥料の入った芝の目土16l" style="left:1670.00px;top:1105.00px;width:210.00px;height:125.00px;font-size:18px"><div>肥料の入った</div><div>芝の目土</div><div>16L</div></div><div class="item" data-index="87" data-label="石原和幸氏監修 芝の目土・床土 25L" data-search="石原和幸氏監修芝の目土床土25l" style="left:1670.00px;top:1230.00px;width:210.00px;height:125.00px;font-size:18px"><div>石原和幸氏監修</div><div>芝の目土・床土</div><div>25L</div></div><div class="item" data-index="88" data-label="芝の目砂 15L" data-search="芝の目砂15l" style="left:1670.00px;top:980.00px;width:210.00px;height:125.00px;font-size:18px"><div>芝の目砂</div><div>15L</div></div><div class="item" data-index="89" data-label="芝の目土 14L" data-search="芝の目土14l" style="left:1880.00px;top:1355.00px;width:210.00px;height:125.00px;font-size:18px"><div>芝の目土</div><div>14L</div></div><div class="item" data-index="90" data-label="肥料の入った 芝の目土 16L" data-search="肥料の入った芝の目土16l" style="left:1880.00px;top:1105.00px;width:210.00px;height:125.00px;font-size:18px"><div>肥料の入った</div><div>芝の目土</div><div>16L</div></div><div class="item" data-index="91" data-label="芝のお手入れ材 14L" data-search="芝のお手入れ材14l" style="left:1880.00px;top:1230.00px;width:210.00px;height:125.00px;font-size:18px"><div>芝のお手入れ材</div><div>14L</div></div><div class="item" data-index="92" data-label="芝の目砂 15L" data-search="芝の目砂15l" style="left:1880.00px;top:980.00px;width:210.00px;height:125.00px;font-size:18px"><div>芝の目砂</div><div>15L</div></div><div class="item" data-index="93" data-label="捨てられる培養土 14L" data-search="捨てられる培養土14l" style="left:1670.00px;top:785.00px;width:210.00px;height:125.00px;font-size:18px"><div>捨てられる培養土</div><div>14L</div></div><div class="item" data-index="94" data-label="牛めし屋さんの リサイクル堆肥" data-search="牛めし屋さんのリサイクル堆肥" style="left:1880.00px;top:785.00px;width:210.00px;height:125.00px;font-size:18px"><div>牛めし屋さんの</div><div>リサイクル堆肥</div></div><div class="label" style="left:42.00px;top:492.43px;width:24.62px;height:70.15px;font-size:16px">下段</div><div class="label" style="left:42.00px;top:367.43px;width:24.62px;height:70.15px;font-size:16px">上段</div><div class="label" style="left:42.00px;top:172.43px;width:24.62px;height:70.15px;font-size:16px">上段</div><div class="label" style="left:42.00px;top:47.42px;width:24.62px;height:70.15px;font-size:16px">下段</div>
+</div>
+</div>
+</div>
+</div>
 </main>
-
 <script>
 (() => {
-  const q = document.getElementById('q');
-  const searchBtn = document.getElementById('searchBtn');
-  const clearBtn = document.getElementById('clearBtn');
-  const status = document.getElementById('status');
-  const numberResult = document.getElementById('numberResult');
-  const floorWrap = document.querySelector('.floor-wrap');
-  const salesFloor = document.querySelector('.sales-floor');
-  const cells = [...document.querySelectorAll('.cell[data-search]')];
+  const BASE_W=2120.00, BASE_H=1890.00;
+  const q=document.getElementById('q');
+  const searchBtn=document.getElementById('searchBtn');
+  const clearBtn=document.getElementById('clearBtn');
+  const status=document.getElementById('status');
+  const results=document.getElementById('results');
+  const resultTitle=document.getElementById('resultTitle');
+  const resultList=document.getElementById('resultList');
+  const floorScroll=document.getElementById('floorScroll');
+  const mapSizer=document.getElementById('mapSizer');
+  const layout=document.getElementById('layout');
+  const items=[...document.querySelectorAll('.item')];
+  let currentScale=1;
 
-  const numberItems = {
-    1: ['配合肥料5kg', '油粕5kg', '配合肥料10kg'],
-    2: ['骨粉入り油粕ペレット5kg', '骨粉入り油粕5kg', '有機リン酸バットグアノ'],
-    3: ['堆肥入り化成肥料10kg', '野菜専用化成10kg', '堆肥入り化成肥料'],
-    4: ['野菜専用化成5kg', '堆肥入り化成肥料8-10-8 5kg', '堆肥入り化成肥料12-10-8 5kg', '野菜づくり一粒入魂4-5-4 5kg'],
-    5: ['粒状苦土石灰5kg', '消石灰5kg', '有機石灰5kg'],
-    6: ['ハイパワー苦土石灰4kg', '骨粉入り野菜の肥料5kg', 'ペレット鶏糞5kg'],
-    7: ['消石灰10kg', '有機石灰10kg', '庭木・果樹の肥料5kg'],
-    8: ['発酵油粕（中粒）', '発酵油粕（小粒）', '芝生の肥料666'],
-    9: ['固形骨粉', '緑化', '薔薇の肥料5kg'],
-    10: ['サッチを分解する芝生肥料5kg', '野菜の肥料5kg'],
-    11: ['有機100%芝生の肥料10kg', '有機100%芝生の肥料5kg', '野菜の肥料10kg'],
-    12: ['ねぎ・玉ねぎの肥料5kg', 'ジャガイモの肥料5kg', '有機リン酸バットグアノ5kg'],
-    13: ['ねぎ・玉ねぎの肥料10kg', 'ジャガイモの肥料10kg', 'ブルーベリーの肥料5kg'],
-    14: ['粒状苦土石灰10kg', '消石灰10kg', '有機石灰10kg']
-  };
-  const circledNumbers = ['', '①', '②', '③', '④', '⑤', '⑥', '⑦', '⑧', '⑨', '⑩', '⑪', '⑫', '⑬', '⑭'];
+  const normalize=(s)=>String(s||'').normalize('NFKC').toLowerCase()
+    .replace(/[\s・･,，。．/／()（）\[\]【】「」『』＋+\-－_%％]/g,'');
 
-  let fitFrame;
-
-function fitFloorOverview() {
-  cancelAnimationFrame(fitFrame);
-
-  fitFrame = requestAnimationFrame(() => {
-    const shouldFit = window.matchMedia(
-      '(max-width:720px) and (orientation:portrait)'
-    ).matches;
-
-    if (!shouldFit) {
-      salesFloor.style.zoom = '';
-      salesFloor.style.transform = '';
-      floorWrap.style.height = '';
-      return;
-    }
-
-    const mobileFloorWidth = 1168;
-    const scale = Math.min(
-      1,
-      floorWrap.clientWidth / mobileFloorWidth
-    );
-
-    salesFloor.style.transform = 'none';
-    salesFloor.style.zoom = String(scale);
-    floorWrap.style.height = '';
-  });
-}
-
-
-
-
-  
-  const norm = s => s
-    .normalize('NFKC')
-    .toLowerCase()
-    .replace(/[・･\s　()（）％%]/g,'')
-    .replace(/[ーｰ]/g,'ー');
-
-  function clearMatches() {
-    cells.forEach(c => c.classList.remove('match'));
-  }
-
-  function clearNumberResult() {
-    numberResult.hidden = true;
-    numberResult.replaceChildren();
-  }
-
-  function showNumberResults(hits) {
-    const numbers = [...new Set(hits
-      .map(cell => cell.dataset.number || cell.querySelector('.num')?.textContent.trim())
-      .filter(number => numberItems[number]))]
-      .sort((a, b) => Number(a) - Number(b));
-
-    if (!numbers.length) {
-      clearNumberResult();
-      return false;
-    }
-
-    const heading = document.createElement('h3');
-    heading.textContent = '番号付き商品の検索結果';
-    numberResult.replaceChildren(heading);
-
-    numbers.forEach(number => {
-      const entry = document.createElement('div');
-      entry.className = 'number-result-entry';
-
-      const title = document.createElement('h4');
-      title.textContent = circledNumbers[Number(number)] || number;
-      entry.appendChild(title);
-
-      const list = document.createElement('ul');
-      numberItems[number].forEach(item => {
-        const li = document.createElement('li');
-        li.textContent = item;
-        list.appendChild(li);
-      });
-      entry.appendChild(list);
-      numberResult.appendChild(entry);
-    });
-
-    numberResult.hidden = false;
-    return true;
-  }
-
-  function runSearch() {
-    clearMatches();
-    const raw = q.value.trim();
-    if (!raw) {
-      clearNumberResult();
-      status.textContent = '商品名を入力すると該当場所が点滅します。';
-      return;
-    }
-    const words = norm(raw).split(/[\/／,、]+/).filter(Boolean);
-    const hits = cells.filter(c => {
-      const hay = norm(c.dataset.search + ' ' + c.textContent);
-      return words.every(w => hay.includes(w));
-    });
-
-    hits.forEach(c => {
-      void c.offsetWidth;
-      c.classList.add('match');
-    });
-    const hasNumberResults = showNumberResults(hits);
-
-    if (hits.length) {
-      const portraitOverview = window.matchMedia('(max-width:720px) and (orientation:portrait)').matches;
-      if (!portraitOverview) {
-        const scrollTarget = hasNumberResults && window.matchMedia('(max-width:720px)').matches
-          ? numberResult
-          : hits[0];
-        scrollTarget.scrollIntoView({behavior:'smooth', block:'center', inline:'center'});
+  function fitText(){
+    items.forEach(el=>{
+      if(el.classList.contains('blank')) return;
+      let size=18;
+      el.style.fontSize=size+'px';
+      while(size>7 && (el.scrollHeight>el.clientHeight || el.scrollWidth>el.clientWidth)){
+        size-=1;el.style.fontSize=size+'px';
       }
-      status.textContent = `「${raw}」：${hits.length}か所見つかりました。`;
-    } else {
-      status.textContent = `「${raw}」は見つかりませんでした。`;
-    }
+    });
   }
 
-  searchBtn.addEventListener('click', runSearch);
-  q.addEventListener('keydown', e => {
-    if (e.key === 'Enter') runSearch();
-  });
-  q.addEventListener('search', () => {
-    if (!q.value) {
-      clearMatches();
-      clearNumberResult();
-      status.textContent = '商品名を入力すると該当場所が点滅します。';
-    }
-  });
-  clearBtn.addEventListener('click', () => {
-    q.value = '';
+  function fitMap(){
+    const mobile=window.matchMedia('(max-width:720px)').matches;
+    const available=Math.max(280, floorScroll.clientWidth - (mobile?12:20));
+    currentScale = mobile ? Math.min(1, available/BASE_W) : Math.min(1, available/BASE_W);
+    layout.style.transform=`scale(${currentScale})`;
+    mapSizer.style.width=(BASE_W*currentScale)+'px';
+    mapSizer.style.height=(BASE_H*currentScale)+'px';
+  }
+
+  function clearMatches(){
+    items.forEach(el=>el.classList.remove('match'));
+    results.classList.remove('show');
+    resultList.replaceChildren();
+  }
+
+  function jumpTo(el){
+    const cardTop=document.querySelector('.floor-card').getBoundingClientRect().top + window.scrollY;
+    const top=parseFloat(el.style.top||0)*currentScale;
+    window.scrollTo({top:Math.max(0,cardTop+top-160),behavior:'smooth'});
+    el.classList.remove('match');
+    void el.offsetWidth;
+    el.classList.add('match');
+  }
+
+  function runSearch(){
     clearMatches();
-    clearNumberResult();
-    status.textContent = '商品名を入力すると該当場所が点滅します。';
-    q.focus();
-  });
-
-  window.addEventListener('resize', fitFloorOverview);
-  window.addEventListener('orientationchange', fitFloorOverview);
-  if ('ResizeObserver' in window) {
-    new ResizeObserver(fitFloorOverview).observe(salesFloor);
+    const raw=q.value.trim();
+    const n=normalize(raw);
+    if(!n){status.textContent='商品名を入力すると該当する棚が点滅します。';return;}
+    const terms=raw.split(/\s+/).map(normalize).filter(Boolean);
+    const matches=items.filter(el=>{
+      if(el.classList.contains('blank')) return false;
+      const hay=el.dataset.search||'';
+      return terms.every(t=>hay.includes(t));
+    });
+    matches.forEach(el=>el.classList.add('match'));
+    if(!matches.length){
+      status.innerHTML='<span class="no-result">「'+escapeHtml(raw)+'」に一致する商品は見つかりませんでした。</span>';
+      return;
+    }
+    status.textContent='「'+raw+'」：'+matches.length+'か所見つかりました。';
+    resultTitle.textContent='該当する棚 '+matches.length+'件';
+    matches.forEach((el,i)=>{
+      const b=document.createElement('button');
+      b.type='button'; b.className='result-chip';
+      b.textContent=(i+1)+'. '+(el.dataset.label||'該当棚');
+      b.addEventListener('click',()=>jumpTo(el));
+      resultList.appendChild(b);
+    });
+    results.classList.add('show');
+    const first=matches[0];
+    setTimeout(()=>jumpTo(first),80);
   }
-  fitFloorOverview();
+
+  function escapeHtml(s){const d=document.createElement('div');d.textContent=s;return d.innerHTML}
+
+  searchBtn.addEventListener('click',runSearch);
+  q.addEventListener('keydown',e=>{if(e.key==='Enter'){e.preventDefault();runSearch();}});
+  clearBtn.addEventListener('click',()=>{q.value='';clearMatches();status.textContent='商品名を入力すると該当する棚が点滅します。';q.focus();window.scrollTo({top:0,behavior:'smooth'});});
+  window.addEventListener('resize',fitMap,{passive:true});
+  fitText(); fitMap();
 })();
 </script>
 </body>
