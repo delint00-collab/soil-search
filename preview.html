@@ -1,0 +1,789 @@
+<!DOCTYPE html>
+
+<html lang="ja">
+<head>
+<meta charset="utf-8"/>
+<meta content="width=device-width,initial-scale=1,maximum-scale=5,user-scalable=yes" name="viewport"/>
+<title>土売場検索</title>
+<style>
+
+:root{
+  --bg:#f2f6f1;--card:#fff;--text:#1d2a22;--muted:#647168;--line:#34453a;
+  --accent:#1d6b45;--accent-dark:#124a2f;--accent-soft:#e2f3e9;--gold:#d5a72f;
+  --shadow:0 8px 24px rgba(35,62,45,.10);
+}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{
+  margin:0;font-family:system-ui,-apple-system,"Segoe UI","Noto Sans JP","Hiragino Kaku Gothic ProN",Meiryo,sans-serif;
+  color:var(--text);background:radial-gradient(circle at 100% 0,rgba(177,211,187,.32),transparent 34rem),var(--bg)
+}
+header{position:sticky;top:0;z-index:50;color:#fff;background:linear-gradient(135deg,var(--accent-dark),var(--accent));box-shadow:0 4px 18px rgba(18,74,47,.22)}
+.head{max-width:1380px;margin:auto;padding:14px 16px}
+h1{font-size:1.28rem;margin:0 0 10px;letter-spacing:.02em} h1::before{content:"🌿";margin-right:.45rem}
+.search-row{display:flex;gap:8px;align-items:center;padding:7px;background:rgba(255,255,255,.13);border:1px solid rgba(255,255,255,.18);border-radius:15px}
+input[type=search]{flex:1;min-width:0;padding:12px 14px;font-size:16px;color:var(--text);border:0;border-radius:10px;background:#fff;outline:0}
+input[type=search]:focus{box-shadow:0 0 0 3px rgba(255,225,133,.88)}
+button{border:0;border-radius:10px;padding:12px 18px;font-size:15px;font-weight:700;background:#fff;color:var(--accent-dark);cursor:pointer;transition:transform .15s ease,box-shadow .15s ease}
+button:hover{transform:translateY(-1px);box-shadow:0 4px 12px rgba(0,0,0,.16)} button:active{transform:translateY(0)}
+button.secondary{background:rgba(255,255,255,.16);color:#fff;border:1px solid rgba(255,255,255,.36)}
+.status{font-size:.88rem;color:rgba(255,255,255,.84);margin-top:7px;min-height:1.3em}
+main{max-width:1380px;margin:auto;padding:20px 14px 48px}
+.legend{background:#fff;border:1px solid #d7e2da;border-left:5px solid var(--gold);border-radius:12px;padding:12px 14px;margin-bottom:16px;font-size:.9rem;box-shadow:var(--shadow)}
+ .mobile-hint{display:none}
+.results{display:none;background:#fff;border:2px solid var(--accent);border-radius:14px;padding:12px 14px;margin:0 0 16px;box-shadow:var(--shadow)}
+.results.show{display:block} .results h2{font-size:1rem;color:var(--accent);margin:0 0 8px}
+.result-list{display:flex;flex-wrap:wrap;gap:7px}
+.result-chip{border:1px solid #c9d8ce;background:#f8fbf9;border-radius:999px;padding:7px 10px;font-size:.82rem;color:var(--text);cursor:pointer;max-width:100%;white-space:normal;text-align:left}
+.result-chip:hover{background:var(--accent-soft)}
+.floor-card{background:rgba(255,255,255,.82);border:1px solid #d9e4dc;border-radius:14px;box-shadow:var(--shadow);padding:10px;overflow:hidden}
+.floor-scroll{overflow:auto;-webkit-overflow-scrolling:touch;overscroll-behavior:contain;border-radius:10px;background:#edf3ef;padding:10px}
+.map-sizer{position:relative;margin:0 auto}
+.layout{position:absolute;left:0;top:0;width:2120.00px;height:1890.00px;background:#fff;transform-origin:top left;border:2px solid var(--line);border-radius:9px;overflow:hidden;box-shadow:0 3px 10px rgba(31,35,40,.08)}
+.item{position:absolute;box-sizing:border-box;border:1px solid var(--line);display:flex;flex-direction:column;justify-content:center;align-items:center;text-align:center;line-height:1.18;padding:5px 7px;overflow:hidden;overflow-wrap:anywhere;word-break:normal;background:#fff;transition:background .16s ease,box-shadow .16s ease}
+.item:hover{background:#f1f8f3} .item.blank{background:#fbfcfb}
+.item div{max-width:100%;white-space:normal}
+.label{position:absolute;box-sizing:border-box;display:flex;align-items:center;justify-content:center;text-align:center;line-height:1;white-space:nowrap;font-weight:800;color:var(--accent-dark);writing-mode:vertical-rl;text-orientation:upright;letter-spacing:.08em}
+.match{z-index:3;outline:8px solid #f0b928;outline-offset:-8px;background:#fff6cf!important;animation:blink .7s ease-in-out 5}
+@keyframes blink{0%,100%{box-shadow:inset 0 0 0 0 rgba(255,238,90,0)}50%{box-shadow:inset 0 0 0 999px rgba(255,238,90,.48)}}
+@media (prefers-reduced-motion:reduce){.match{animation:none}}
+.no-result{color:#8b342a;font-weight:700}
+@media (max-width:720px){
+  .head{padding:10px} h1{font-size:1.05rem;margin-bottom:8px}
+  .search-row{display:grid;grid-template-columns:1fr 1fr 1fr;gap:7px}
+  input[type=search]{grid-column:1/-1;width:100%;padding:11px 12px} button{min-height:44px;padding:10px 12px}
+  .status{font-size:.8rem;margin-top:6px} main{padding:12px 8px 36px}
+  .legend{padding:10px;margin-bottom:10px;font-size:.82rem;line-height:1.5} .mobile-hint{display:block;margin-top:4px;color:var(--accent);font-weight:700}
+  .floor-card{padding:6px} .floor-scroll{padding:6px;overflow:visible}
+  .result-chip{font-size:.75rem}
+}
+
+.item.multi-cell{
+  padding:0;
+  display:flex;
+  flex-direction:column;
+  align-items:stretch;
+  justify-content:stretch;
+}
+.item.multi-cell .multi-product{
+  flex:1 1 0;
+  min-height:0;
+  width:100%;
+  box-sizing:border-box;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  text-align:center;
+  line-height:1.12;
+  padding:4px 6px;
+}
+.item.multi-cell .multi-product{
+  position:relative;
+}
+.item.multi-cell .multi-product + .multi-product{
+  border-top:none;
+}
+.item.multi-cell .multi-product + .multi-product::before{
+  content:"";
+  position:absolute;
+  top:0;
+  left:7px;
+  right:7px;
+  border-top:2px solid #c9c9c9;
+}
+
+</style>
+</head>
+<body>
+<header>
+<div class="head">
+<h1>土売場検索</h1>
+<div class="search-row">
+<input autocomplete="off" id="q" placeholder="例：赤玉土、苦土石灰、培養土" type="search"/>
+<button id="searchBtn" type="button">検索</button>
+<button class="secondary" id="clearBtn" type="button">クリア</button>
+<button aria-pressed="false" class="secondary" id="flipBtn" type="button">反転</button></div>
+<div aria-live="polite" class="status" id="status">商品名を入力すると該当する場所が点滅します。</div>
+</div>
+</header>
+<main>
+<div class="legend"><span class="mobile-hint">縦画面では売場全体を縮小表示します。必要に応じてピンチ操作で拡大できます。</span></div>
+<section aria-live="polite" class="results" id="results">
+<h2 id="resultTitle">検索結果</h2>
+<div class="result-list" id="resultList"></div>
+</section>
+<div class="floor-card">
+<div class="floor-scroll" id="floorScroll">
+<div class="map-sizer" id="mapSizer">
+<div aria-label="土売場レイアウト 左90度回転" class="layout" id="layout" style="">
+
+</div>
+</div>
+</div>
+</div>
+</main>
+
+<script>
+// ============================================================
+// 土売場 商品データ
+// 普段の商品変更は、基本的にこのファイルだけ編集してください。
+// ============================================================
+//
+// 1商品:
+//   "骨粉入り油粕 10kg"
+//
+// 1マスに複数商品:
+//   ["商品A", "商品B", "商品C"]
+//   → 商品数に応じて自動で等分され、2pxの区切り線が入ります。
+//
+// 空きマス:
+//   ""
+//
+// 縦2マスを結合:
+//   { items: ["商品名"], rowSpan: 2 }
+//   → その直下は null のままにします。
+//
+// 検索用データは商品名から自動生成します。
+// ============================================================
+
+window.SOIL_DATA = {
+  "mainBlocks": [
+    {
+      "labels": [
+        "下段",
+        "上段"
+      ],
+      "rows": [
+        [
+          [
+            "野菜づくり一粒入魂4-5-4",
+            "国産野菜専用化成肥料14-10-13 10kg"
+          ],
+          "骨粉入り油粕 10kg",
+          "油かす 10kg",
+          "有機化成肥料 6-6-6 10kg",
+          "有機・天然原料100％ 野菜の肥料 8kg",
+          "化成肥料 8-8-8 10kg",
+          {
+            "items": [
+              "花と野菜の循環型培養土 25L"
+            ],
+            "rowSpan": 2
+          }
+        ],
+        [
+          [
+            "土づくり堆肥入り化成肥料 10kg",
+            "国産野菜専用化成肥料14-10-13 5kg"
+          ],
+          [
+            "バットグアノ 5kg",
+            "骨粉入り油粕 5kg",
+            "骨粉入り油かすペレット 5kg"
+          ],
+          [
+            "配合肥料 10kg",
+            "油かす 5kg",
+            "配合肥料 5kg"
+          ],
+          [
+            "化成肥料ようりん+ 5kg",
+            "有機化成肥料 6-6-6 5kg"
+          ],
+          "有機・天然原料100％ 野菜の肥料 4kg",
+          "化成肥料 8-8-8 5kg",
+          null
+        ]
+      ]
+    },
+    {
+      "labels": [
+        "上段",
+        "下段"
+      ],
+      "rows": [
+        [
+          [
+            "粒状苦土石灰 5kg",
+            "消石灰 5kg",
+            "有機石灰 5kg"
+          ],
+          [
+            "ハイパワー苦土石灰 4kg",
+            "木酢入りペレット鶏ふん 5kg"
+          ],
+          [
+            "発酵油かす 中粒 5kg",
+            "発酵油かす 小粒 5kg"
+          ],
+          [
+            "芝生の肥料 5kg",
+            "サッチを分解する芝生肥料 5kg",
+            "野菜の肥料 5kg"
+          ],
+          [
+            "ねぎ・玉ねぎの肥料 5kg",
+            "おいしいじゃがいも・さといもの肥料 5kg",
+            "バットグアノ 5kg"
+          ],
+          [
+            "粒状苦土石灰 5kg",
+            "消石灰 5kg",
+            "有機石灰 5kg"
+          ],
+          {
+            "items": [
+              "循環型培養土 10L"
+            ],
+            "rowSpan": 2
+          }
+        ],
+        [
+          "粒状苦土石灰 10kg",
+          [
+            "消石灰 10kg",
+            "有機石灰 10kg",
+            "庭木・果樹の肥料 5kg"
+          ],
+          [
+            "固形骨粉 5kg",
+            "緑花 5kg",
+            "バラの肥料 5kg"
+          ],
+          [
+            "日清 芝生の肥料 10kg",
+            "日清 芝生の肥料 5kg",
+            "野菜の肥料 10kg"
+          ],
+          [
+            "ねぎ・玉ねぎの肥料 10kg",
+            "おいしいじゃがいも・さといもの肥料 10kg",
+            "ブルーベリーの肥料 5kg"
+          ],
+          [
+            "粒状苦土石灰 10kg",
+            "消石灰 10kg",
+            "有機石灰 10kg"
+          ],
+          null
+        ]
+      ]
+    },
+    {
+      "labels": [
+        "",
+        ""
+      ],
+      "rows": [
+        [
+          "",
+          "",
+          "プランターの土 14L",
+          "プランターの土 14L",
+          "プランターの土 14L",
+          "プランターの土 14L",
+          "石原和幸氏監修 プレミアム培養土 25L"
+        ],
+        [
+          "",
+          "",
+          "マグァンプK入りお花を育てる培養土 25L",
+          "初めての花の培養土 14L",
+          "お花を育てる培養土 25L",
+          "お花を育てる培養土 14L",
+          "プレミアム プランターの土 14L"
+        ]
+      ]
+    },
+    {
+      "labels": [
+        "",
+        ""
+      ],
+      "rows": [
+        [
+          "かるーい培養土 25L",
+          "初めての野菜の培養土 40L",
+          "初めての野菜の培養土 25L",
+          "マグァンプK入り野菜を育てる培養土 25L",
+          "おいしい野菜を育てる堆肥 25L",
+          "野菜を育てる培養土 25L",
+          "野菜を育てる培養土 25L"
+        ],
+        [
+          "かるい培養土 12L",
+          "つやつやな観葉植物を育てる培養土 14L",
+          "オーガニック培養土 14L",
+          "花と野菜のかる～い 培養土 25L",
+          "野菜を育てる培養土 40L",
+          "そのまま植えられる 野菜の培養土 15L",
+          "そのまま植えられる 野菜の培養土 15L"
+        ]
+      ]
+    },
+    {
+      "labels": [
+        "",
+        ""
+      ],
+      "rows": [
+        [
+          "種まきの匠 14L",
+          "バーク堆肥入り 腐葉土 14L",
+          "木の葉100％腐葉土 25L",
+          "黒土 14L",
+          "黒土 14L",
+          "赤玉土 中粒 14L",
+          "赤玉土 小粒 14L"
+        ],
+        [
+          "花壇・庭造りの土 30L",
+          [
+            "ブルーベリーの土 25L",
+            "いちごの培養土 14L",
+            "捨てられる培養土 14L"
+          ],
+          "果樹・庭木の土 25L",
+          "鹿沼土 細粒 14L",
+          "上質鹿沼土 14L",
+          "赤玉土 大粒 14L",
+          "赤玉土 小粒 14L"
+        ]
+      ]
+    },
+    {
+      "labels": [
+        "",
+        ""
+      ],
+      "rows": [
+        [
+          "土のリサイクル材 25L",
+          "土のリサイクル材 14L",
+          "薔薇の匠 25L",
+          "ピートモス 18L",
+          "バーミキュライト 18L",
+          "那須高原黒毛和牛の堆肥 20L",
+          "特別な堆肥 25L"
+        ],
+        [
+          "鉢底石 10L",
+          "川砂 10L",
+          [
+            "軽石 小粒",
+            "桐生砂 14L"
+          ],
+          "デコレーション バークM 50L",
+          "デコレーション バークM 25L",
+          "発酵牛糞 25L",
+          "発酵牛糞 25L"
+        ]
+      ]
+    }
+  ],
+  "side": {
+    "upperIsland": [
+      [
+        "捨てられる培養土 14L",
+        "牛めし屋さんの リサイクル堆肥"
+      ]
+    ],
+    "turfIsland": [
+      [
+        "芝の目砂 15L",
+        "芝の目砂 15L"
+      ],
+      [
+        "肥料の入った 芝の目土 16L",
+        "肥料の入った 芝の目土 16L"
+      ],
+      [
+        "石原和幸氏監修 芝の目土・床土 25L",
+        "芝のお手入れ材 14L"
+      ],
+      [
+        "芝の床土 16L",
+        "芝の目土 14L"
+      ]
+    ]
+  }
+};
+
+</script><script>
+(() => {
+  "use strict";
+
+  const BASE_W = 2120;
+  const BASE_H = 1890;
+
+  // 商品入れ替えだけなら、ここは編集不要です。
+  const LAYOUT = {
+    cellWidth: 210,
+    cellHeight: 125,
+    mainX: 70,
+    blockYs: [20, 340, 660, 980, 1300, 1620],
+
+    labelX: 42,
+    labelWidth: 24.62,
+    labelHeight: 70.15,
+
+    upperIslandX: 1670,
+    upperIslandY: 785,
+
+    turfIslandX: 1670,
+    turfIslandY: 980
+  };
+
+  const data = window.SOIL_DATA;
+
+  const q = document.getElementById("q");
+  const searchBtn = document.getElementById("searchBtn");
+  const clearBtn = document.getElementById("clearBtn");
+  const flipBtn = document.getElementById("flipBtn");
+  const status = document.getElementById("status");
+  const results = document.getElementById("results");
+  const resultTitle = document.getElementById("resultTitle");
+  const resultList = document.getElementById("resultList");
+  const floorScroll = document.getElementById("floorScroll");
+  const mapSizer = document.getElementById("mapSizer");
+  const layout = document.getElementById("layout");
+
+  let items = [];
+  let targets = [];
+  let currentScale = 1;
+  let flipped = false;
+
+  const normalize = (s) => String(s || "")
+    .normalize("NFKC")
+    .toLowerCase()
+    .replace(/[\s・･,，。．/／()（）\[\]【】「」『』＋+\-－_%％]/g, "");
+
+  function parseCell(cell) {
+    if (cell === null) {
+      return { skip: true };
+    }
+
+    if (cell === "") {
+      return { items: [], rowSpan: 1 };
+    }
+
+    if (typeof cell === "string") {
+      return { items: [cell], rowSpan: 1 };
+    }
+
+    if (Array.isArray(cell)) {
+      return { items: cell, rowSpan: 1 };
+    }
+
+    if (cell && typeof cell === "object" && Array.isArray(cell.items)) {
+      return {
+        items: cell.items,
+        rowSpan: Number(cell.rowSpan) || 1
+      };
+    }
+
+    return { items: [], rowSpan: 1 };
+  }
+
+  function saveNormalBox(el, left, top, width, height) {
+    el.dataset.normalLeft = String(left);
+    el.dataset.normalTop = String(top);
+    el.dataset.boxWidth = String(width);
+    el.dataset.boxHeight = String(height);
+  }
+
+  function createItem(cell, left, top) {
+    const parsed = parseCell(cell);
+    if (parsed.skip) return;
+
+    const width = LAYOUT.cellWidth;
+    const height = LAYOUT.cellHeight * parsed.rowSpan;
+
+    const el = document.createElement("div");
+    el.className = "item";
+    el.style.left = left.toFixed(2) + "px";
+    el.style.top = top.toFixed(2) + "px";
+    el.style.width = width.toFixed(2) + "px";
+    el.style.height = height.toFixed(2) + "px";
+    el.style.fontSize = "18px";
+
+    saveNormalBox(el, left, top, width, height);
+
+    if (parsed.items.length === 0) {
+      el.classList.add("blank");
+      layout.appendChild(el);
+      return;
+    }
+
+    el.dataset.label = parsed.items.join(" / ");
+    el.dataset.search = normalize(parsed.items.join(" "));
+
+    if (parsed.items.length > 1) {
+      el.classList.add("multi-cell");
+
+      parsed.items.forEach(name => {
+        const line = document.createElement("div");
+        line.className = "multi-product";
+        line.textContent = name;
+        el.appendChild(line);
+      });
+    } else {
+      const line = document.createElement("div");
+      line.textContent = parsed.items[0];
+      el.appendChild(line);
+    }
+
+    layout.appendChild(el);
+  }
+
+  function createLabel(text, top) {
+    if (!text) return;
+
+    const left = LAYOUT.labelX;
+    const width = LAYOUT.labelWidth;
+    const height = LAYOUT.labelHeight;
+    const y = top + (LAYOUT.cellHeight - height) / 2;
+
+    const el = document.createElement("div");
+    el.className = "label";
+    el.textContent = text;
+    el.style.left = left.toFixed(2) + "px";
+    el.style.top = y.toFixed(2) + "px";
+    el.style.width = width.toFixed(2) + "px";
+    el.style.height = height.toFixed(2) + "px";
+    el.style.fontSize = "16px";
+
+    saveNormalBox(el, left, y, width, height);
+    layout.appendChild(el);
+  }
+
+  function renderMainBlocks() {
+    data.mainBlocks.forEach((block, blockIndex) => {
+      const blockTop = LAYOUT.blockYs[blockIndex];
+
+      for (let rowIndex = 0; rowIndex < 2; rowIndex++) {
+        const rowTop = blockTop + rowIndex * LAYOUT.cellHeight;
+        createLabel(block.labels?.[rowIndex] || "", rowTop);
+
+        const row = block.rows?.[rowIndex] || [];
+
+        for (let colIndex = 0; colIndex < 7; colIndex++) {
+          createItem(
+            colIndex < row.length ? row[colIndex] : "",
+            LAYOUT.mainX + colIndex * LAYOUT.cellWidth,
+            rowTop
+          );
+        }
+      }
+    });
+  }
+
+  function renderGrid(rows, startX, startY) {
+    rows.forEach((row, rowIndex) => {
+      row.forEach((cell, colIndex) => {
+        createItem(
+          cell,
+          startX + colIndex * LAYOUT.cellWidth,
+          startY + rowIndex * LAYOUT.cellHeight
+        );
+      });
+    });
+  }
+
+  function renderLayout() {
+    layout.replaceChildren();
+
+    renderMainBlocks();
+
+    renderGrid(
+      data.side.upperIsland || [],
+      LAYOUT.upperIslandX,
+      LAYOUT.upperIslandY
+    );
+
+    renderGrid(
+      data.side.turfIsland || [],
+      LAYOUT.turfIslandX,
+      LAYOUT.turfIslandY
+    );
+
+    items = [...layout.querySelectorAll(".item")];
+    targets = [...layout.querySelectorAll(".item, .label")];
+  }
+
+  function fitText() {
+    items.forEach(el => {
+      if (el.classList.contains("blank")) return;
+
+      let size = 18;
+      el.style.fontSize = size + "px";
+
+      while (
+        size > 7 &&
+        (el.scrollHeight > el.clientHeight || el.scrollWidth > el.clientWidth)
+      ) {
+        size -= 1;
+        el.style.fontSize = size + "px";
+      }
+    });
+  }
+
+  function fitMap() {
+    const mobile = window.matchMedia("(max-width:720px)").matches;
+    const available = Math.max(
+      280,
+      floorScroll.clientWidth - (mobile ? 12 : 20)
+    );
+
+    currentScale = Math.min(1, available / BASE_W);
+
+    layout.style.transform = `scale(${currentScale})`;
+    mapSizer.style.width = (BASE_W * currentScale) + "px";
+    mapSizer.style.height = (BASE_H * currentScale) + "px";
+  }
+
+  function clearMatches() {
+    items.forEach(el => el.classList.remove("match"));
+    results.classList.remove("show");
+    resultList.replaceChildren();
+  }
+
+  function jumpTo(el) {
+    const cardTop =
+      document.querySelector(".floor-card").getBoundingClientRect().top +
+      window.scrollY;
+
+    const top = parseFloat(el.style.top || 0) * currentScale;
+
+    window.scrollTo({
+      top: Math.max(0, cardTop + top - 160),
+      behavior: "smooth"
+    });
+
+    el.classList.remove("match");
+    void el.offsetWidth;
+    el.classList.add("match");
+  }
+
+  function runSearch() {
+    clearMatches();
+
+    const raw = q.value.trim();
+    const terms = raw.split(/\s+/).map(normalize).filter(Boolean);
+
+    if (!terms.length) {
+      status.textContent =
+        "商品名を入力すると該当する場所が点滅します。";
+      return;
+    }
+
+    const matches = items.filter(el => {
+      if (el.classList.contains("blank")) return false;
+
+      const hay = el.dataset.search || "";
+      return terms.every(term => hay.includes(term));
+    });
+
+    matches.forEach(el => el.classList.add("match"));
+
+    if (!matches.length) {
+      status.innerHTML =
+        '<span class="no-result">「' +
+        escapeHtml(raw) +
+        '」に一致する商品は見つかりませんでした。</span>';
+      return;
+    }
+
+    status.textContent =
+      `「${raw}」：${matches.length}か所見つかりました。`;
+
+    resultTitle.textContent =
+      `該当する場所 ${matches.length}件`;
+
+    matches.forEach((el, index) => {
+      const button = document.createElement("button");
+      button.type = "button";
+      button.className = "result-chip";
+      button.textContent =
+        `${index + 1}. ${el.dataset.label || "該当場所"}`;
+      button.addEventListener("click", () => jumpTo(el));
+      resultList.appendChild(button);
+    });
+
+    results.classList.add("show");
+
+    setTimeout(() => jumpTo(matches[0]), 80);
+  }
+
+  function escapeHtml(s) {
+    const div = document.createElement("div");
+    div.textContent = s;
+    return div.innerHTML;
+  }
+
+  function applyOrientation() {
+    targets.forEach(el => {
+      const normalLeft = Number(el.dataset.normalLeft);
+      const normalTop = Number(el.dataset.normalTop);
+      const width = Number(el.dataset.boxWidth);
+      const height = Number(el.dataset.boxHeight);
+
+      if (
+        !Number.isFinite(normalLeft) ||
+        !Number.isFinite(normalTop) ||
+        !Number.isFinite(width) ||
+        !Number.isFinite(height)
+      ) return;
+
+      if (flipped) {
+        el.style.left =
+          (BASE_W - normalLeft - width).toFixed(2) + "px";
+        el.style.top =
+          (BASE_H - normalTop - height).toFixed(2) + "px";
+      } else {
+        el.style.left = normalLeft.toFixed(2) + "px";
+        el.style.top = normalTop.toFixed(2) + "px";
+      }
+    });
+
+    // ボタン名は常に「反転」
+    flipBtn.textContent = "反転";
+    flipBtn.setAttribute(
+      "aria-pressed",
+      flipped ? "true" : "false"
+    );
+  }
+
+  searchBtn.addEventListener("click", runSearch);
+
+  q.addEventListener("keydown", event => {
+    if (event.key === "Enter") {
+      event.preventDefault();
+      runSearch();
+    }
+  });
+
+  clearBtn.addEventListener("click", () => {
+    q.value = "";
+    clearMatches();
+    status.textContent =
+      "商品名を入力すると該当する場所が点滅します。";
+    q.focus();
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  });
+
+  flipBtn.addEventListener("click", () => {
+    flipped = !flipped;
+    applyOrientation();
+  });
+
+  window.addEventListener("resize", fitMap, { passive: true });
+
+  renderLayout();
+  fitText();
+  fitMap();
+  applyOrientation();
+})();
+
+</script></body>
+</html>

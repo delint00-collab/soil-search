@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+
+<html lang="ja">
+<head>
+<meta charset="utf-8"/>
+<meta content="width=device-width,initial-scale=1,maximum-scale=5,user-scalable=yes" name="viewport"/>
+<title>土売場検索</title>
+<link href="style.css?v=1" rel="stylesheet"/>
+</head>
+<body>
+<header>
+<div class="head">
+<h1>土売場検索</h1>
+<div class="search-row">
+<input autocomplete="off" id="q" placeholder="例：赤玉土、苦土石灰、培養土" type="search"/>
+<button id="searchBtn" type="button">検索</button>
+<button class="secondary" id="clearBtn" type="button">クリア</button>
+<button aria-pressed="false" class="secondary" id="flipBtn" type="button">反転</button></div>
+<div aria-live="polite" class="status" id="status">商品名を入力すると該当する場所が点滅します。</div>
+</div>
+</header>
+<main>
+<div class="legend"><span class="mobile-hint">縦画面では売場全体を縮小表示します。必要に応じてピンチ操作で拡大できます。</span></div>
+<section aria-live="polite" class="results" id="results">
+<h2 id="resultTitle">検索結果</h2>
+<div class="result-list" id="resultList"></div>
+</section>
+<div class="floor-card">
+<div class="floor-scroll" id="floorScroll">
+<div class="map-sizer" id="mapSizer">
+<div aria-label="土売場レイアウト 左90度回転" class="layout" id="layout" style="">
+
+</div>
+</div>
+</div>
+</div>
+</main>
+
+<script src="data.js?v=1"></script><script src="app.js?v=1"></script></body>
+</html>
