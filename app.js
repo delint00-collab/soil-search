@@ -35,11 +35,14 @@
   const floorScroll = document.getElementById("floorScroll");
   const mapSizer = document.getElementById("mapSizer");
   const layout = document.getElementById("layout");
+  const updatedAt = document.getElementById("updatedAt");
 
   let items = [];
   let targets = [];
   let currentScale = 1;
   let flipped = false;
+
+  if (updatedAt) updatedAt.textContent = window.SOIL_UPDATED_AT || "---";
 
   const normalize = (s) => String(s || "")
     .normalize("NFKC")

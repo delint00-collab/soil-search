@@ -83,3 +83,27 @@ main{max-width:1380px;margin:auto;padding:20px 14px 48px}
   right:7px;
   border-top:2px solid #c9c9c9;
 }
+
+.title-row{
+  display:flex;
+  align-items:baseline;
+  gap:12px;
+  margin:0 0 10px;
+}
+.title-row h1{
+  margin:0;
+}
+.updated-at{
+  font-size:.82rem;
+  color:rgba(255,255,255,.82);
+  white-space:nowrap;
+}
+@media (max-width:720px){
+  .title-row{
+    gap:8px;
+    margin-bottom:8px;
+  }
+  .updated-at{
+    font-size:.72rem;
+  }
+}
