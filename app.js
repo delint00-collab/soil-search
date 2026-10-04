@@ -42,7 +42,60 @@
   let currentScale = 1;
   let flipped = false;
 
-  if (updatedAt) updatedAt.textContent = window.SOIL_UPDATED_AT || "---";
+  async function loadUpdatedAt() {
+    if (!updatedAt) return;
+
+    updatedAt.textContent = "取得中…";
+
+    const apiUrl =
+      "https://api.github.com/repos/delint00-collab/soil-search/commits?path=data.js&per_page=1";
+
+    try {
+      const response = await fetch(apiUrl, {
+        method: "GET",
+        headers: {
+          "Accept": "application/vnd.github+json"
+        },
+        cache: "no-store"
+      });
+
+      if (!response.ok) {
+        throw new Error(`GitHub API: ${response.status}`);
+      }
+
+      const commits = await response.json();
+      const iso =
+        commits?.[0]?.commit?.committer?.date ||
+        commits?.[0]?.commit?.author?.date;
+
+      if (!iso) {
+        throw new Error("更新日時が取得できませんでした");
+      }
+
+      const date = new Date(iso);
+
+      const parts = new Intl.DateTimeFormat("ja-JP", {
+        timeZone: "Asia/Tokyo",
+        year: "numeric",
+        month: "2-digit",
+        day: "2-digit",
+        hour: "2-digit",
+        minute: "2-digit",
+        hour12: false
+      }).formatToParts(date);
+
+      const value = Object.fromEntries(
+        parts.map(part => [part.type, part.value])
+      );
+
+      updatedAt.textContent =
+        `${value.year}/${value.month}/${value.day} ${value.hour}:${value.minute}`;
+
+    } catch (error) {
+      console.warn("更新日時の取得に失敗しました:", error);
+      updatedAt.textContent = "取得失敗";
+    }
+  }
 
   const normalize = (s) => String(s || "")
     .normalize("NFKC")
@@ -374,4 +427,5 @@
   fitText();
   fitMap();
   applyOrientation();
+  loadUpdatedAt();
 })();
